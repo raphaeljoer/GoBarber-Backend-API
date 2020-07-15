@@ -155,6 +155,7 @@ FNDA:1,(anonymous_18)
 FNDA:3,SendForgotPasswordEmail
 FNDA:3,(anonymous_20)
 DA:1,1
+DA:2,1
 DA:7,1
 DA:14,1
 DA:17,3
@@ -164,12 +165,13 @@ DA:26,3
 DA:27,3
 DA:29,3
 DA:30,1
-DA:33,4
+DA:33,2
 DA:35,2
-DA:40,1
-DA:42,1
-LF:14
-LH:14
+DA:42,4
+DA:57,1
+DA:59,1
+LF:16
+LH:16
 BRDA:27,0,0,3
 BRDA:29,1,0,1
 BRDA:29,1,1,2
