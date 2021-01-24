@@ -1,11 +1,12 @@
 import { startOfHour, isBefore, getHours, format } from 'date-fns';
-import { inject, injectable } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
+
+import AppError from '@shared/errors/AppError';
 
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
-import IAppointmentRepository from '@modules/appointments/repositories/IAppointmentsRepository';
 import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
-import Appointment from '@modules/appointments/infra/typeorm/entities/Appointment';
-import AppError from '@shared/errors/AppError';
+import Appointment from '../infra/typeorm/entities/Appointment';
+import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
 
 interface IRequest {
   provider_id: string;
@@ -17,7 +18,7 @@ interface IRequest {
 class CreateAppointmentService {
   constructor(
     @inject('AppointmentsRepository')
-    private appointmentsRepository: IAppointmentRepository,
+    private appointmentsRepository: IAppointmentsRepository,
 
     @inject('NotificationsRepository')
     private notificationsRepository: INotificationsRepository,
@@ -27,14 +28,18 @@ class CreateAppointmentService {
   ) {}
 
   public async execute({
+    date,
     provider_id,
     user_id,
-    date,
   }: IRequest): Promise<Appointment> {
     const appointmentDate = startOfHour(date);
 
     if (isBefore(appointmentDate, Date.now())) {
-      throw new AppError("You can't create appointment on a past date");
+      throw new AppError("You can't create an appointemnt on a past date.");
+    }
+
+    if (user_id === provider_id) {
+      throw new AppError("You can't create an appointment with yourself.");
     }
 
     if (getHours(appointmentDate) < 8 || getHours(appointmentDate) > 17) {
@@ -45,6 +50,7 @@ class CreateAppointmentService {
 
     const findAppointmentInSameDate = await this.appointmentsRepository.findByDate(
       appointmentDate,
+      provider_id,
     );
 
     if (findAppointmentInSameDate) {
